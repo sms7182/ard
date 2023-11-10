@@ -146,7 +146,7 @@ quirc_decode_error_t err;
 struct QRCodeData qrCodeData;
 String QRCodeResult = "";
 String QRCodeResultSend = "";
-
+int connectingCnt=0;
 bool ws_run = false;
 int wsLive_val = 0;
 int last_wsLive_val;
@@ -647,6 +647,8 @@ bool checkHasWifiUserPass() {
 
 
 bool connectToWifi(bool isserver) {
+  Serial.println("befor check");
+  
   if (ssid == "" || ip == "") {
     Serial.println("Undefined SSID or IP address.");
     return false;
@@ -662,8 +664,10 @@ bool connectToWifi(bool isserver) {
     Serial.println("STA Failed to configure");
     return false;
   }
+ 
   WiFi.begin(ssid.c_str(), password.c_str());
   Serial.println("Connecting to Wifi...");
+
   unsigned long currentMillis = millis();
   previousMillis = currentMillis;
 
@@ -687,6 +691,11 @@ bool connectToWifi(bool isserver) {
     if(connecting_process_timed_out > 0) connecting_process_timed_out--;
     if(connecting_process_timed_out == 0) {
       delay(1000);
+      
+      writingFile("/ssid.txt", "");
+      writingFile("/password.txt", "");
+      ssid="";
+      password="";
       ESP.restart();
     }
   }
@@ -964,7 +973,6 @@ String readingFile(String path) {
   rFile.close();
   return info;
 }
-
 
 
 /* ________________________________________________________________________________ VOID SETUP() */
